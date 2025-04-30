@@ -1,0 +1,123 @@
+<div class="container mt-4">
+  <h2>Select</h2>
+
+  <div>
+    <button class="btn btn-outline-primary me-2" (click)="showPaperSearch()">Paper Details</button>
+    <button class="btn btn-outline-success me-2" (click)="showCitationSearch()">Citation Path</button>
+    <button class="btn btn-outline-info" (click)="showCustomSearch()">Custom Query</button>
+  </div>
+
+  <form [formGroup]="searchForm" (ngSubmit)="search()" class="mt-3">
+    <div *ngIf="isPaperSearchVisible">
+      <h3 style="background-color: #4dff11; text-align: center;">Paper Details</h3>
+      <div class="form-group mb-3">
+        <label class="form-label">Paper ID</label>
+        <input type="text" class="form-control border border-primary rounded-3 shadow-sm" formControlName="paperId" placeholder="Enter paper ID">
+        <small class="form-text text-muted">
+          Example IDs: {{ examplePaperIds.join(', ') }}
+        </small>
+      </div>
+    </div>
+
+    <div *ngIf="isCitationSearchVisible">
+      <h3 style="background-color: #4dff11; text-align: center;">Citation Path</h3>
+      <div class="form-group mb-3">
+        <div class="row">
+          <div class="col">
+            <label class="form-label">From Paper ID</label>
+            <input type="text" class="form-control border border-primary rounded-3 shadow-sm" formControlName="fromPaperId" placeholder="From paper ID">
+            <small class="form-text text-muted">
+              Example IDs: "31336 to 31353"
+            </small>
+          </div>
+          <div class="col">
+            <label class="form-label">To Paper ID</label>
+            <input type="text" class="form-control border border-primary rounded-3 shadow-sm" formControlName="toPaperId" placeholder="To paper ID">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isCustomSearchVisible">
+      <h3 style="background-color: #4dff11; text-align: center;">Custom Query</h3>
+      <div class="form-group mb-3">
+        <label class="form-label">Custom Cypher Query</label>
+        <textarea class="form-control border border-primary rounded-3 shadow-sm" formControlName="customQuery" rows="4"></textarea>
+        <small class="form-text text-muted">
+          Example: MATCH (p:Paper) RETURN p.id as id, p.class as class LIMIT 10
+        </small>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+      <span *ngIf="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <span *ngIf="!isLoading">Search</span>
+    </button>
+  </form>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div class="mt-4">
+    <div *ngIf="paperDetails">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Paper Details
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">ID: {{ paperDetails?.id }}</h5>
+          <p class="card-text">
+            <strong>Classification:</strong> {{ paperDetails?.class }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="citationPath">
+      <div *ngIf="citationPath.exists; else noCitationPath">
+        <div class="card mt-3">
+          <div class="card-header bg-success text-white">
+            Citation Path
+          </div>
+          <div class="card-body">
+            <p>{{ citationPath?.message }}</p>
+            <ol>
+              <li *ngFor="let paperId of citationPath.path">{{ paperId }}</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <ng-template #noCitationPath>
+        <div class="alert alert-warning mt-3">
+          {{ citationPath?.message || 'No citation path found' }}
+        </div>
+      </ng-template>
+    </div>
+
+    <div *ngIf="results.length > 0">
+      <div class="card mt-3">
+        <div class="card-header bg-info text-white">
+          Query Results ({{ results.length }} records)
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th *ngFor="let key of getResultKeys(results)">{{ key }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of results">
+                  <td *ngFor="let key of getResultKeys(results)">{{ item[key] | json }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

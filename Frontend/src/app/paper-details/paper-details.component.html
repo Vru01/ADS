@@ -1,0 +1,7 @@
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="!error && paper">
+  <h2>{{ paper.title }}</h2>
+  <p>{{ paper.abstract }}</p>
+  <!-- Add more fields as needed -->
+</div>
